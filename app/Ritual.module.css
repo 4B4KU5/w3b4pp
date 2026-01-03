@@ -1,0 +1,39 @@
+/* Paste ALL the CSS from your <style> tag here */
+/* I have added 'composes' or converted some inline styles to classes */
+
+body, html {
+    margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+    background-color: #080808; user-select: none; -webkit-user-select: none;
+    color: white; font-family: 'Inter', sans-serif; touch-action: none;
+    -webkit-touch-callout: none;
+}
+
+.ritualContainer {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background-color: #080808;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ... (Paste the rest of the CSS here, changing #ids to .classes where necessary for reusability) ... */
+
+/* Example conversion: */
+#ritual-header { position: absolute; top: 0; ... } 
+/* becomes */
+.ritualHeader { position: absolute; top: 0; ... }
+
+/* IMPORTANT: Keep the @keyframes and .helix-arm styles exactly as they were */
+.helixIndicator { position: absolute; top: 8px; left: 8px; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; z-index: 101; }
+.helixArm { position: absolute; width: 24px; height: 24px; border-radius: 50%; opacity: 0.4; animation: rotate 20s linear infinite; }
+.helixArm:nth-child(1) { background: rgba(0,255,255,0.6); animation-delay: 0s; }
+.helixArm:nth-child(2) { background: rgba(255,0,255,0.6); animation-delay: -6.66s; }
+.helixArm:nth-child(3) { background: rgba(255,215,0,0.6); animation-delay: -13.33s; }
+
+@keyframes rotate {
+    0% { transform: rotate(0deg) scale(1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+/* ... Continue pasting the rest of your CSS ... */
