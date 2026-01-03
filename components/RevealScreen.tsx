@@ -1,34 +1,83 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
 
 interface RevealScreenProps {
-  result: string
-  onRestart: () => void
+  imageSrc: string
+  audioBlob: Blob
+  onNewRitual: () => void
+  onOpenLibrary: () => void
+  onAlterRecording: (blob: Blob) => void
 }
 
-export function RevealScreen({ result, onRestart }: RevealScreenProps) {
+export function RevealScreen({ imageSrc, audioBlob, onNewRitual, onOpenLibrary, onAlterRecording }: RevealScreenProps) {
+  const [audioUrl, setAudioUrl] = useState<string>('')
+
+  useEffect(() => {
+    const url = URL.createObjectURL(audioBlob)
+    setAudioUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [audioBlob])
+
+  const handleDownload = () => {
+    const url = URL.createObjectURL(audioBlob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `4b4ku5_${Date.now()}.webm`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   return (
-    <div className="absolute inset-0 flex items-center justify-center p-8 bg-gradient-to-b from-black/50 to-transparent">
-      <Card className="max-w-2xl w-full text-center">
-        <div className="mb-8">
-          <div className="w-32 h-32 bg-gradient-to-r from-accent to-purple-500 rounded-full mx-auto mb-8 shadow-2xl" />
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent">
-            Ritual Complete
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg-overlay backdrop-blur-md">
+      <Card className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-8 space-y-6">
+          <h2 className="text-4xl font-bold text-center bg-gradient-to-r from-accent to-purple-500 bg-clip-text text-transparent">
+            Sound Print Crystallized
           </h2>
-          <p className="text-xl opacity-90 mb-8 max-w-md mx-auto">
-            The energies have aligned. Behold the manifestation:
-          </p>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <img 
+                src={imageSrc} 
+                alt="Sound Print Visualization" 
+                className="w-full rounded-lg border border-bg-tertiary shadow-xl"
+              />
+            </div>
+            
+            <div className="space-y-4 flex flex-col justify-center">
+              <p className="text-fg-secondary text-center md:text-left">
+                Your unique pattern has been recorded as permanent governance evidence.
+              </p>
+              
+              {audioUrl && (
+                <audio controls className="w-full mt-4">
+                  <source src={audioUrl} type="audio/webm" />
+                  Your browser does not support the audio element.
+                </audio>
+              )}
+              
+              <div className="flex flex-col gap-3 pt-4">
+                <Button variant="secondary" onClick={handleDownload}>
+                  ⬇️ Download Recording
+                </Button>
+                <Button variant="secondary" onClick={() => onAlterRecording(audioBlob)}>
+                  🔄 Alter this Sound Print
+                </Button>
+                <Button variant="secondary" onClick={onOpenLibrary}>
+                  📚 View in Library
+                </Button>
+                <Button variant="primary" onClick={onNewRitual}>
+                  🎵 New Ritual
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <div className="bg-black/20 p-8 rounded-xl border border-white/10 mb-8">
-          <p className="text-2xl font-mono whitespace-pre-wrap text-accent">{result}</p>
-        </div>
-        
-        <Button variant="primary" size="lg" onClick={onRestart}>
-          🔄 New Ritual
-        </Button>
       </Card>
     </div>
   )
