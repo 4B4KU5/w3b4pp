@@ -9,10 +9,9 @@ export default function RitualPage() {
   useEffect(() => {
     if (canvasRef.current === null) return;
 
-    // --- PASTE YOUR ENTIRE SCRIPT LOGIC BELOW THIS LINE ---
-    const scriptContent = '
-      
-        <script>
+    // --- SCRIPT CONTENT START ---
+    // Note: I added \ before internal backticks so Next.js ignores them
+    const scriptContent = `
         let RITUAL_DURATION = 360;
         let sessionTimer;
         let countdownInterval;
@@ -62,8 +61,8 @@ export default function RitualPage() {
         getQueryParams();
 
         /* ==================== LIBRARY SYSTEM ==================== */
-        function getLibrary(type) { return JSON.parse(localStorage.getItem(`4b4ku5_${type}`) || '[]'); }
-        function setLibrary(type, data) { localStorage.setItem(`4b4ku5_${type}`, JSON.stringify(data)); }
+        function getLibrary(type) { return JSON.parse(localStorage.getItem(\`4b4ku5_\${type}\`) || '[]'); }
+        function setLibrary(type, data) { localStorage.setItem(\`4b4ku5_\${type}\`, JSON.stringify(data)); }
         
         function saveToLibrary(print, privacy = 'public') {
             print.privacy = privacy;
@@ -137,8 +136,8 @@ export default function RitualPage() {
         }
         
         function updateLibraryCounts() {
-            document.getElementById('private-count').textContent = `(${getLibrary('private').length}/${PRIVATE_MAX})`;
-            document.getElementById('trash-count').textContent = `(${getLibrary('trash').length}/${TRASH_MAX})`;
+            document.getElementById('private-count').textContent = \`(\${getLibrary('private').length}/\${PRIVATE_MAX})\`;
+            document.getElementById('trash-count').textContent = \`(\${getLibrary('trash').length}/\${TRASH_MAX})\`;
         }
 
         function initAudio() {
@@ -190,7 +189,7 @@ export default function RitualPage() {
         function getColorForBand(bandIndex) {
             const segment = Math.floor(bandIndex / 6);
             const colorHex = CIRCLE_OF_SIX[Math.min(segment, 5)];
-            return new THREE.Color(`#${colorHex.toString(16).padStart(6, '0')}`);
+            return new THREE.Color(\`#\${colorHex.toString(16).padStart(6, '0')}\`);
         }
 
         function createColumnSpheres(x) {
@@ -389,7 +388,7 @@ export default function RitualPage() {
             const update = () => {
                 const minutes = Math.floor(timeRemaining / 60);
                 const seconds = timeRemaining % 60;
-                timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                timerEl.textContent = \`\${minutes}:\${seconds.toString().padStart(2, '0')}\`;
                 if (timeRemaining === 180) timerEl.style.color = '#fb923c';
                 if (timeRemaining === 60) {
                     timerEl.style.color = '#f87171';
@@ -408,7 +407,6 @@ export default function RitualPage() {
             }, 1000);
         }
 
-        /* FIXED: CRYSTALLIZATION NOW ALWAYS RESOLVES */
         function endSession() {
             if (!ritualActive || crystallizing) return;
             ritualActive = false;
@@ -425,10 +423,8 @@ export default function RitualPage() {
             progressIndicator.style.display = 'block';
             progressIndicator.textContent = 'Crystallizing Sound Print...';
 
-            // Create ribbon from final state
             createRibbonLine();
 
-            // Stop recording and force completion
             if (mediaRecorder && mediaRecorder.state !== 'inactive') {
                 try { 
                     mediaRecorder.requestData(); 
@@ -438,7 +434,6 @@ export default function RitualPage() {
                 }
             }
 
-            // Aggressive fallback - always trigger
             setTimeout(() => {
                 if (crystallizing) {
                     console.warn('Forcing crystallization');
@@ -461,7 +456,7 @@ export default function RitualPage() {
 
             const endedAt = new Date();
             const soundPrint = {
-                id: `${userData.id}_${endedAt.getTime()}`,
+                id: \`\${userData.id}_\${endedAt.getTime()}\`,
                 name: userData.name,
                 tribe: userData.tribe,
                 title: userData.title,
@@ -493,7 +488,7 @@ export default function RitualPage() {
             const url = URL.createObjectURL(lastRecordedBlob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `4b4ku5_${Date.now()}.webm`;
+            a.download = \`4b4ku5_\${Date.now()}.webm\`;
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -530,7 +525,7 @@ export default function RitualPage() {
             
             currentDetailPrint = print;
             document.getElementById('visual-print-detail').src = print.image;
-            document.getElementById('detail-meta').textContent = `${print.name} • ${print.tribe} • ${print.duration}s • ${print.privacy}`;
+            document.getElementById('detail-meta').textContent = \`\${print.name} • \${print.tribe} • \${print.duration}s • \${print.privacy}\`;
             document.getElementById('detail-title').textContent = 'SOUND PRINT';
             
             if (recordedChunks.length > 0) {
@@ -554,7 +549,7 @@ export default function RitualPage() {
             const url = URL.createObjectURL(lastRecordedBlob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `4b4ku5_${currentDetailPrint.id}.webm`;
+            a.download = \`4b4ku5_\${currentDetailPrint.id}.webm\`;
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -570,7 +565,7 @@ export default function RitualPage() {
         function togglePrivacyFromDetail() {
             if (!currentDetailPrint) return;
             togglePrivacy(currentDetailPrint.id);
-            document.getElementById('detail-meta').textContent = `${currentDetailPrint.name} • ${currentDetailPrint.tribe} • ${currentDetailPrint.duration}s • ${currentDetailPrint.privacy}`;
+            document.getElementById('detail-meta').textContent = \`\${currentDetailPrint.name} • \${currentDetailPrint.tribe} • \${currentDetailPrint.duration}s • \${currentDetailPrint.privacy}\`;
             renderPrintGrid(currentLibraryTab);
         }
 
@@ -586,26 +581,26 @@ export default function RitualPage() {
             const grid = document.getElementById('print-grid');
             const prints = getLibrary(tab);
             if (prints.length === 0) {
-                grid.innerHTML = `<div class="empty-state">
-                    ${tab === 'trash' ? 'Trash is empty' : tab === 'private' ? 'No private prints yet' : 'No public prints yet. Complete a ritual to create your first!'}
-                </div>`;
+                grid.innerHTML = \`<div class="empty-state">
+                    \${tab === 'trash' ? 'Trash is empty' : tab === 'private' ? 'No private prints yet' : 'No public prints yet. Complete a ritual to create your first!'}
+                </div>\`;
                 return;
             }
-            grid.innerHTML = prints.map(print => `
-                <div class="print-card" onclick="openPrintDetail('${print.id}')">
-                    <img src="${print.image}" alt="Sound Print">
-                    <span class="privacy-badge">${print.privacy === 'private' ? 'Private' : 'Public'}</span>
+            grid.innerHTML = prints.map(print => \`
+                <div class="print-card" onclick="openPrintDetail('\${print.id}')">
+                    <img src="\${print.image}" alt="Sound Print">
+                    <span class="privacy-badge">\${print.privacy === 'private' ? 'Private' : 'Public'}</span>
                     <div class="meta">
-                        <div class="name">${print.name || 'Unknown'}</div>
-                        <div class="tribe">${print.tribe} • ${print.duration}s</div>
+                        <div class="name">\${print.name || 'Unknown'}</div>
+                        <div class="tribe">\${print.tribe} • \${print.duration}s</div>
                     </div>
                     <div class="actions" onclick="event.stopPropagation()">
-                        <button onclick="openPrintDetail('${print.id}')" title="Play">▶</button>
-                        <button onclick="togglePrivacy('${print.id}');event.stopPropagation();" title="Toggle Privacy">👁</button>
-                        <button onclick="deletePrint('${print.id}', '${tab}');event.stopPropagation();" title="Delete">🗑</button>
+                        <button onclick="openPrintDetail('\${print.id}')" title="Play">▶</button>
+                        <button onclick="togglePrivacy('\${print.id}');event.stopPropagation();" title="Toggle Privacy">👁</button>
+                        <button onclick="deletePrint('\${print.id}', '\${tab}');event.stopPropagation();" title="Delete">🗑</button>
                     </div>
                 </div>
-            `).join('');
+            \`).join('');
         }
 
         async function startRitualWithAudio(buffer) {
@@ -672,7 +667,6 @@ export default function RitualPage() {
             reader.readAsArrayBuffer(file);
         }
 
-        /* ==================== INIT ==================== */
         document.getElementById('upload-btn').onclick = () => {
             initAudio();
             if (!audioInitialized) return alert('Audio not supported');
@@ -695,9 +689,7 @@ export default function RitualPage() {
         onResize();
         animate();
         updateLibraryCounts();
-    </script>
-      
-    // --- PASTE YOUR ENTIRE SCRIPT LOGIC ABOVE THIS LINE ---
+    `;
 
     const script = document.createElement('script');
     script.innerHTML = scriptContent;
@@ -708,7 +700,6 @@ export default function RitualPage() {
     };
   }, []);
 
-  // Helper to trigger global functions from your script
   const callGlobal = (fnName: string) => {
     if (typeof window !== 'undefined' && (window as any)[fnName]) {
       (window as any)[fnName]();
@@ -717,7 +708,6 @@ export default function RitualPage() {
 
   return (
     <div className={styles.ritualContainer}>
-      {/* Header */}
       <div id="ritual-header" className={styles.ritualHeader}>
         <div className={styles.helixIndicator}>
           <div className={styles.helixArm}></div>
@@ -732,7 +722,6 @@ export default function RitualPage() {
         <div id="timer" className={styles.timer}>0:00</div>
       </div>
 
-      {/* Prompt Screen */}
       <div id="prompt-screen" className={styles.promptScreen}>
         <div id="ritual-title" className={styles.ritualTitle}>GENESIS RITUAL</div>
         <p className={styles.ritualInstruction}>Upload an MP3 to begin your ritual of gestural sovereignty.</p>
@@ -750,10 +739,8 @@ export default function RitualPage() {
         </div>
       </div>
 
-      {/* Canvas */}
       <canvas ref={canvasRef} id="main-canvas" className={styles.mainCanvas}></canvas>
 
-      {/* Bottom Bar */}
       <div id="bottom-bar" className={styles.bottomBar}>
         <button id="library-btn-ritual" className={styles.rewardBtn} style={{padding: '10px 20px'}} onClick={() => callGlobal('openLibrary')}>Library</button>
         <div id="progress-indicator" className={styles.progressIndicator}>Loading ritual space...</div>
@@ -764,7 +751,6 @@ export default function RitualPage() {
         Tap anywhere to activate — finger rolls create rhythmic patterns
       </div>
 
-      {/* Reveal Screen */}
       <div id="reveal-screen" className={styles.revealScreen}>
         <h2 id="crystallized-title" className={styles.crystallizedTitle}>SOUND PRINT CRYSTALLIZED</h2>
         <div className={styles.printContainer}>
@@ -782,7 +768,6 @@ export default function RitualPage() {
         </div>
       </div>
 
-      {/* Library Modal */}
       <div id="library-modal" className={styles.libraryModal}>
         <div className={styles.libraryHeader}>
           <h3 style={{ margin: 0, color: '#4ade80' }}>Sound Print Library</h3>
@@ -796,7 +781,6 @@ export default function RitualPage() {
         <div className={styles.printGrid} id="print-grid"></div>
       </div>
 
-      {/* Print Detail Modal */}
       <div id="print-detail-modal" className={styles.printDetailModal}>
         <div className={styles.detailHeader}>
           <h2 id="detail-title" style={{ margin: 0, color: '#4ade80', fontFamily: 'var(--font-orbitron)' }}>Sound Print</h2>
