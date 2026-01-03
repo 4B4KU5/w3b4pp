@@ -777,29 +777,243 @@ export default function RitualPage() {
           <div className={`${styles.libraryTab} ${styles.active}`} data-tab="public" onClick={() => (window as any).switchLibraryTab?.('public')}>Public</div>
           <div className={styles.libraryTab} data-tab="private" onClick={() => (window as any).switchLibraryTab?.('private')}>Private <span className={styles.count} id="private-count">(0/6)</span></div>
           <div className={styles.libraryTab} data-tab="trash" onClick={() => (window as any).switchLibraryTab?.('trash')}>Trash <span className={styles.count} id="trash-count">(0/3)</span></div>
-        </div>
-        <div className={styles.printGrid} id="print-grid"></div>
-      </div>
+'use client'
 
-      <div id="print-detail-modal" className={styles.printDetailModal}>
-        <div className={styles.detailHeader}>
-          <h2 id="detail-title" style={{ margin: 0, color: '#4ade80', fontFamily: 'var(--font-orbitron)' }}>Sound Print</h2>
-          <button className={styles.detailClose} onClick={() => callGlobal('closePrintDetail')}>✕ Close</button>
-        </div>
-        <div className={styles.printContainerDetail}>
-          <img id="visual-print-detail" className={styles.visualPrintDetail} src="" alt="Sound Print Visual" />
-          <div className={styles.playerContainerDetail}>
-            <p id="detail-meta" style={{ color: '#ccc', maxWidth: '400px' }}></p>
-            <audio className={styles.audioPlayer} id="audio-player-detail" controls></audio>
-            <div className={styles.controlButtons}>
-              <button className={styles.downloadBtn} onClick={() => callGlobal('downloadPrintFromDetail')}>Download</button>
-              <button className={styles.rewardBtn} onClick={() => callGlobal('alterPrintFromDetail')}>Alter</button>
-              <button className={styles.rewardBtn} onClick={() => callGlobal('togglePrivacyFromDetail')}>Toggle Privacy</button>
-              <button className={styles.rewardBtn} onClick={() => callGlobal('deletePrintFromDetail')}>Delete</button>
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { RitualCanvas } from '@/components/RitualCanvas'
+import { RevealScreen } from '@/components/RevealScreen'
+import { LibraryModal } from '@/components/LibraryModal'
+import { Button } from '@/components/ui/button'
+
+export default function Home() {
+  const searchParams = useSearchParams()
+  
+  // Step management: upload → decoding → ritual → reveal
+  const [step, setStep] = useState<'upload' | 'decoding' | 'ritual' | 'reveal'>('upload')
+  
+  // Audio state
+  const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null)
+  const [audioResult, setAudioResult] = useState<Blob | null>(null)
+  const [imageResult, setImageResult] = useState<string>('')
+  const [flatMode, setFlatMode] = useState(false) // From the checkbox
+  const [isPaused, setIsPaused] = useState(false)
+  
+  // UI state
+  const [showLibrary, setShowLibrary] = useState(false)
+  
+  const audioCtxRef = useRef<AudioContext | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  // Get user info from query params (preserved from original)
+  const userData = {
+    name: searchParams.get('name') || 'F0UND3R',
+    tribe: searchParams.get('tribe') || 'The Two Tribes',
+    title: searchParams.get('title') || 'Architect'
+  }
+
+  // Keyboard shortcuts: Space (pause), Cmd/Ctrl+R (restart ritual)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger when typing in inputs
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+      
+      if (e.code === 'Space' && step === 'ritual') {
+        e.preventDefault()
+        setIsPaused(prev => !prev)
+      }
+      
+      if ((e.metaKey || e.ctrlKey) && e.code === 'KeyR' && step === 'ritual') {
+        e.preventDefault()
+        handleRestart()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [step])
+
+  // File handling: Decode MP3 → AudioBuffer
+  const handleFileSelect = useCallback(async (file: File) => {
+    if (!file.type.startsWith('audio/')) {
+      alert('Please select an audio file')
+      return
+    }
+    
+    setStep('decoding')
+    
+    try {
+      // Lazy init AudioContext (must be after user gesture)
+      if (!audioCtxRef.current) {
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+        audioCtxRef.current = new AudioContext()
+      }
+      
+      const arrayBuffer = await file.arrayBuffer()
+      const decoded = await audioCtxRef.current.decodeAudioData(arrayBuffer)
+      
+      setAudioBuffer(decoded)
+      setStep('ritual')
+      setIsPaused(false)
+    } catch (error) {
+      console.error('Audio decoding failed:', error)
+      alert('Failed to decode audio file. Try a different MP3.')
+      setStep('upload')
+    }
+  }, [])
+
+  // RitualCanvas completion: Save results + auto-save to library
+  const handleRitualComplete = useCallback((result: { imageDataUrl: string; audioBlob: Blob }) => {
+    setImageResult(result.imageDataUrl)
+    setAudioResult(result.audioBlob)
+    setStep('reveal')
+    
+    // Auto-save to library (public by default, matching original behavior)
+    try {
+      const libraryItem = {
+        id: `${userData.name}_${Date.now()}`,
+        name: userData.name,
+        tribe: userData.tribe,
+        title: userData.title,
+        image: result.imageDataUrl,
+        timestamp: new Date().toISOString().split('T')[0],
+        duration: Math.floor(audioBuffer?.duration || 360),
+        privacy: 'public' as const
+      }
+      
+      const existing = JSON.parse(localStorage.getItem('4b4ku5_public') || '[]')
+      existing.unshift(libraryItem)
+      localStorage.setItem('4b4ku5_public', JSON.stringify(existing))
+    } catch (e) {
+      console.error('Failed to auto-save to library:', e)
+    }
+  }, [userData, audioBuffer?.duration])
+
+  const handleRestart = useCallback(() => {
+    setStep('upload')
+    setAudioBuffer(null)
+    setAudioResult(null)
+    setImageResult('')
+    setIsPaused(false)
+  }, [])
+
+  // "Alter this" functionality: Feed the recorded blob back into the upload flow
+  const handleAlterRecording = useCallback((blob: Blob) => {
+    const file = new File([blob], 'altered.webm', { type: 'audio/webm' })
+    handleFileSelect(file)
+  }, [handleFileSelect])
+
+  return (
+    <main className="min-h-screen">
+      {/* Hidden file input for drag-and-drop/click upload */}
+      <input 
+        ref={fileInputRef}
+        type="file" 
+        accept="audio/mp3,audio/*" 
+        className="sr-only" 
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) handleFileSelect(file)
+          e.target.value = '' // Reset so same file can be re-selected
+        }}
+      />
+
+      {/* STEP 1: Upload Screen (replaces original #prompt-screen) */}
+      {step === 'upload' && (
+        <div className="flex flex-col items-center justify-center min-h-screen p-8 space-y-8">
+          <div className="text-center mb-8">
+            <h1 className="text-6xl font-bold bg-gradient-to-r from-accent to-purple-400 bg-clip-text text-transparent mb-4">
+              4B4KU5
+            </h1>
+            <p className="text-xl text-fg-secondary">Genesis Ritual • {userData.name}</p>
+          </div>
+
+          <div className="card max-w-2xl w-full">
+            <div className="space-y-6">
+              <div 
+                className="border-2 border-dashed border-bg-tertiary rounded-xl p-16 text-center hover:border-accent transition-colors cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  const file = e.dataTransfer.files[0]
+                  if (file) handleFileSelect(file)
+                }}
+              >
+                <div className="text-5xl mb-4">📁</div>
+                <p className="text-lg font-medium mb-2">Drop MP3 here or click to browse</p>
+                <p className="text-sm text-fg-muted">
+                  Your gestural performance will be crystallized as governance evidence
+                </p>
+              </div>
+
+              <label className="flex items-center justify-center gap-2 text-sm text-fg-secondary cursor-pointer p-4 bg-bg-tertiary/50 rounded-lg">
+                <input 
+                  type="checkbox" 
+                  checked={flatMode}
+                  onChange={(e) => setFlatMode(e.target.checked)}
+                  className="w-4 h-4 accent-accent bg-bg-secondary border-bg-tertiary rounded"
+                />
+                Start with all bands muted (-18dB) — Artist Mode
+              </label>
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="secondary" 
+                  className="flex-1"
+                  onClick={() => setShowLibrary(true)}
+                >
+                  📚 Sound Print Library
+                </Button>
+                <Button 
+                  variant="primary" 
+                  className="flex-1"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Upload & Begin
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
+      )}
+
+      {/* STEP 2: Decoding loader */}
+      {step === 'decoding' && (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-fg-secondary">Loading ritual space...</p>
+          </div>
+        </div>
+      )}
+
+      {/* STEP 3: The Ritual (Three.js visualization) */}
+      {step === 'ritual' && audioBuffer && (
+        <RitualCanvas 
+          audioBuffer={audioBuffer}
+          isPaused={isPaused}
+          flatMode={flatMode} // 🔧 Make sure you added this prop to RitualCanvas!
+          onComplete={handleRitualComplete}
+        />
+      )}
+
+      {/* STEP 4: Reveal Screen (shows captured image + audio player) */}
+      {step === 'reveal' && audioResult && imageResult && (
+        <RevealScreen 
+          imageSrc={imageResult}
+          audioBlob={audioResult}
+          onNewRitual={handleRestart}
+          onOpenLibrary={() => setShowLibrary(true)}
+          onAlterRecording={handleAlterRecording}
+        />
+      )}
+
+      {/* Library Modal (accessible from upload or reveal) */}
+      <LibraryModal 
+        isOpen={showLibrary} 
+        onClose={() => setShowLibrary(false)} 
+      />
+    </main>
+  )
 }
