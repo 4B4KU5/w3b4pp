@@ -1,260 +1,61 @@
-/* 1. GLOBAL RESETS (Scoped for this ritual only) */
+/* =========================================
+   1. VARIABLES & THEME CONFIGURATION
+   ========================================= */
+:root {
+  /* Palette */
+  --bg-deep: #080808;
+  --bg-panel: rgba(5, 5, 8, 0.95);
+  --bg-glass: rgba(0, 0, 0, 0.7);
+  
+  --primary: #4ade80;    /* Neon Green */
+  --secondary: #f87171;  /* Soft Red */
+  --accent-cyan: #00ffff;
+  --accent-magenta: #ff00ff;
+  --accent-gold: #ffd700;
+  
+  --text-main: #ffffff;
+  --text-muted: #cccccc;
+  
+  /* Gradients */
+  --grad-main: linear-gradient(90deg, var(--primary), var(--secondary));
+  --grad-rainbow: linear-gradient(90deg, #4ade80, #f87171, #fb923c, #60a5fa, #c084fc, #fde047);
+  
+  /* Fonts */
+  --font-body: var(--font-inter), 'Inter', sans-serif;
+  --font-display: var(--font-orbitron), 'Orbitron', sans-serif;
+  
+  /* Z-Indices */
+  --z-canvas: 1;
+  --z-ui: 100;
+  --z-overlay: 200;
+  --z-modal: 300;
+}
+
+/* =========================================
+   2. GLOBAL RESETS
+   ========================================= */
 :global(html), :global(body) {
-    margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-    background-color: #080808; user-select: none; -webkit-user-select: none;
-    color: white; font-family: var(--font-inter), sans-serif;
-    touch-action: none; -webkit-touch-callout: none;
-}
-
-.ritualContainer {
-    position: relative; width: 100vw; height: 100vh;
-    background-color: #080808; overflow: hidden;
-}
-
-/* 2. HEADER & HELIX */
-.ritualHeader {
-    position: absolute; top: 0; left: 0; width: 100%; padding: 16px;
-    background: linear-gradient(180deg, rgba(8,8,8,0.9) 0%, transparent 100%);
-    z-index: 100; display: flex; justify-content: space-between; align-items: center;
-    box-sizing: border-box;
-}
-
-.helixIndicator {
-    position: absolute; top: 8px; left: 8px; width: 30px; height: 30px;
-    display: flex; justify-content: center; align-items: center; z-index: 101;
-}
-
-.helixArm {
-    position: absolute; width: 24px; height: 24px; border-radius: 50%;
-    opacity: 0.4; animation: rotate 20s linear infinite;
-}
-.helixArm:nth-child(1) { background: rgba(0,255,255,0.6); animation-delay: 0s; }
-.helixArm:nth-child(2) { background: rgba(255,0,255,0.6); animation-delay: -6.66s; }
-.helixArm:nth-child(3) { background: rgba(255,215,0,0.6); animation-delay: -13.33s; }
-
-.timer {
-    padding: 8px 16px; background: rgba(0, 0, 0, 0.7); border-radius: 20px;
-    color: white; font-weight: bold; font-size: 18px;
-    border: 1px solid rgba(0,255,255,0.3); z-index: 20;
-}
-
-/* 3. PROMPT SCREEN (Upload Area) */
-.promptScreen {
-    position: absolute; inset: 0; display: flex; flex-direction: column;
-    justify-content: center; align-items: center; z-index: 10;
-    padding: 20px; box-sizing: border-box; text-align: center;
-    background: radial-gradient(circle at center, #0f1115, #050507);
-}
-
-.ritualTitle {
-    font-size: 32px; font-weight: 800;
-    background: linear-gradient(90deg, #4ade80, #f87171, #fb923c, #60a5fa, #c084fc, #fde047);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    margin-bottom: 20px; font-family: var(--font-orbitron), sans-serif;
-    animation: pulse 4s infinite;
-}
-
-.ritualInstruction { max-width: 500px; line-height: 1.6; margin-bottom: 16px; color: #ccc; font-size: 16px; }
-
-.contextNote {
-    font-size: 14px; color: #aaa; margin: 16px 0; max-width: 400px; padding: 16px;
-    background: rgba(122, 220, 128, 0.05); border-radius: 12px; border-left: 3px solid #4ade80;
-}
-
-.uploadZone {
-    margin: 20px 0; padding: 24px; border: 2px dashed rgba(74, 220, 128, 0.3);
-    border-radius: 16px; background: rgba(0,0,0,0.3); width: 80%; max-width: 400px;
-}
-
-.uploadBtn {
-    padding: 14px 28px; background: linear-gradient(90deg, #4ade80, #f87171);
-    border: none; color: black; font-weight: 800; cursor: pointer;
-    margin: 10px 0; border-radius: 12px; font-size: 16px; transition: all 0.3s;
-}
-
-.artistToggle { display: block; margin-top: 16px; color: #ccc; font-size: 14px; }
-.artistToggle input { margin-right: 8px; }
-
-/* 4. MAIN CANVAS & HUD */
-.mainCanvas { display: none; width: 100%; height: 100%; }
-
-.bottomBar {
-    position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 30px;
-    display: none; justify-content: space-between; align-items: center; z-index: 50;
-    background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
-}
-
-.completionBtn {
-    padding: 14px 28px; background: linear-gradient(90deg, #4ade80, #f87171);
-    border: none; color: black; font-weight: 800; cursor: pointer;
-    border-radius: 12px; font-size: 16px; transition: all 0.3s;
-    box-shadow: 0 10px 30px rgba(74, 220, 128, 0.4);
-}
-
-.progressIndicator {
-    color: #ccc; font-size: 14px; background: rgba(0,0,0,0.7);
-    padding: 8px 16px; border-radius: 12px; border: 1px solid rgba(74, 220, 128, 0.3);
-    display: none;
-}
-
-.guidanceHint {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    color: rgba(74, 220, 128, 0.9); font-size: 18px; font-weight: 600; text-align: center;
-    max-width: 80%; padding: 20px; background: rgba(74, 220, 128, 0.1);
-    border-radius: 20px; border: 1px solid rgba(74, 220, 128, 0.2);
-    opacity: 0; transition: opacity 1s; z-index: 1000; pointer-events: none;
-}
-
-/* 5. REVEAL SCREEN & DETAIL MODAL */
-.revealScreen, .printDetailModal {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    display: none; flex-direction: column; align-items: center;
-    justify-content: flex-start; padding: 40px 20px; background: #000;
-    overflow-y: auto; z-index: 200; text-align: center; box-sizing: border-box;
-}
-
-.crystallizedTitle {
-    font-size: 32px; font-weight: 800; font-family: var(--font-orbitron), sans-serif;
-    background: linear-gradient(90deg, #4ade80, #f87171, #fb923c, #60a5fa, #c084fc, #fde047);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    margin: 0 0 30px 0; animation: pulse 4s infinite;
-}
-
-.printContainer, .printContainerDetail {
-    display: flex; flex-direction: column; align-items: center; gap: 30px;
-    width: 100%; max-width: 900px;
-}
-
-.visualPrint, .visualPrintDetail {
-    max-width: 90%; max-height: 50vh; border: 1px solid rgba(74, 220, 128, 0.3);
-    border-radius: 16px; box-shadow: 0 0 40px rgba(74, 220, 128, 0.25);
-}
-
-.playerContainer, .playerContainerDetail {
-    display: flex; flex-direction: column; align-items: center; gap: 20px;
-    width: 100%; max-width: 560px;
-}
-
-.audioPlayer { width: 100%; max-width: 560px; }
-
-.controlButtons { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; width: 100%; }
-.controlButtons button {
-    flex: 1; min-width: 130px; padding: 12px 20px; border-radius: 12px;
-    font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s;
-}
-
-.rewardBtn { background: rgba(74, 220, 128, 0.2); border: 1px solid #4ade80; color: #4ade80; }
-.downloadBtn { background: rgba(96, 165, 250, 0.2); border: 1px solid #60a5fa; color: #60a5fa; }
-
-/* 6. LIBRARY SYSTEM */
-.libraryModal {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: #050508; display: none; flex-direction: column;
-    z-index: 300; padding: 20px; box-sizing: border-box;
-}
-
-.libraryHeader, .detailHeader {
-    width: 100%; max-width: 900px; display: flex; 
-    justify-content: space-between; align-items: center; margin-bottom: 16px;
-}
-
-.libraryClose, .detailClose {
-    padding: 8px 16px; background: rgba(248, 113, 113, 0.2);
-    border: 1px solid #f87171; color: #f87171; border-radius: 6px; cursor: pointer;
-}
-
-.libraryTabs { display: flex; margin-bottom: 20px; flex-wrap: wrap; gap: 8px; }
-.libraryTab { padding: 10px 20px; background: rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer; color: #ccc; }
-.libraryTab.active { background: rgba(74, 220, 128, 0.3); color: white; }
-
-.printGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; overflow-y: auto; flex: 1; }
-.printCard { border-radius: 8px; overflow: hidden; cursor: pointer; position: relative; background: #111; transition: transform 0.2s; }
-.printCard img { width: 100%; display: block; height: 120px; object-fit: cover; }
-.privacyBadge { position: absolute; top: 4px; right: 4px; font-size: 12px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; }
-
-.cardActions { 
-    position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.9); 
-/* ===== GLOBAL RESET (Must be in globals.css ideally, but works here) ===== */
-:global(html), :global(body) {
-    margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
-    background-color: #080808; user-select: none; -webkit-user-select: none;
-    color: white; font-family: 'Inter', sans-serif;
-    touch-action: none; -webkit-touch-callout: none;
-}
-
-/* ===== MAIN LAYOUT ===== */
-.ritualContainer {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  background-color: #080808;
+  margin: 0; padding: 0; 
+  width: 100%; height: 100%; 
+  background-color: var(--bg-deep); 
+  color: var(--text-main); 
+  font-family: var(--font-body);
   overflow: hidden;
+  
+  /* App-like behavior */
+  user-select: none; 
+  -webkit-user-select: none;
+  touch-action: none;
 }
 
-.ritualHeader {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  padding: 16px;
-  background: linear-gradient(180deg, rgba(8,8,8,0.9) 0%, transparent 100%);
-  z-index: 100;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-.helixIndicator {
-  position: absolute;
-  top: 8px; left: 8px;
-  width: 30px; height: 30px;
-  display: flex; justify-content: center; align-items: center;
-  z-index: 101;
-}
-
-.helixArm {
-  position: absolute;
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  opacity: 0.4;
-  animation: rotate 20s linear infinite;
-}
-.helixArm:nth-child(1) { background: rgba(0,255,255,0.6); animation-delay: 0s; }
-.helixArm:nth-child(2) { background: rgba(255,0,255,0.6); animation-delay: -6.66s; }
-.helixArm:nth-child(3) { background: rgba(255,215,0,0.6); animation-delay: -13.33s; }
-
+/* =========================================
+   3. UTILITIES & ANIMATIONS
+   ========================================= */
 @keyframes rotate {
-  0% { transform: rotate(0deg) scale(1); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
-/* Hidden data container */
-.userRitualInfo {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: 0; border: 0;
-  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
-}
-
-.timer {
-  padding: 8px 16px; background: rgba(0,0,0,0.7); border-radius: 20px;
-  color: #fff; font-weight: bold; font-size: 18px;
-  border: 1px solid rgba(0,255,255,0.3); z-index: 20;
-}
-
-/* ===== PROMPT SCREEN ===== */
-.promptScreen {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
-  z-index: 10; padding: 20px; box-sizing: border-box; text-align: center;
-  background: radial-gradient(circle at center, #0f1115, #050507);
-}
-
-.ritualTitle {
-  font-size: 32px; font-weight: 800;
-  background: linear-gradient(90deg, #4ade80, #f87171, #fb923c, #60a5fa, #c084fc, #fde047);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  margin-bottom: 20px;
-  font-family: var(--font-orbitron), 'Orbitron', sans-serif;
-  animation: pulse 4s infinite;
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 @keyframes pulse {
@@ -262,182 +63,295 @@
   50% { opacity: 1; filter: brightness(1.3); }
 }
 
-.ritualInstruction {
-  max-width: 500px; line-height: 1.6; margin-bottom: 16px; color: #ccc; font-size: 16px;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.contextNote {
-  font-size: 14px; color: #aaa; margin: 16px 0; max-width: 400px;
-  padding: 16px; background: rgba(122, 220, 128, 0.05);
-  border-radius: 12px; border-left: 3px solid #4ade80;
+/* Shared Button Styles */
+.btnBase {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnPrimary {
+  composes: btnBase;
+  background: var(--grad-main);
+  color: #000;
+  box-shadow: 0 4px 15px rgba(74, 220, 128, 0.3);
+}
+.btnPrimary:hover { transform: scale(1.02); filter: brightness(1.1); }
+.btnPrimary:active { transform: scale(0.98); }
+
+.btnGhost {
+  composes: btnBase;
+  background: rgba(74, 220, 128, 0.1);
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  font-size: 14px;
+  padding: 8px 16px;
+}
+
+/* =========================================
+   4. LAYOUT CONTAINERS
+   ========================================= */
+.ritualContainer {
+  position: relative;
+  width: 100vw;
+  height: 100dvh; /* Better mobile support */
+  background-color: var(--bg-deep);
+  overflow: hidden;
+}
+
+/* =========================================
+   5. HEADER & HUD
+   ========================================= */
+.ritualHeader {
+  position: absolute; top: 0; left: 0; width: 100%;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(8,8,8,0.95) 0%, transparent 100%);
+  z-index: var(--z-ui);
+  display: flex; justify-content: space-between; align-items: center;
+  pointer-events: none; /* Let clicks pass through transparent areas */
+}
+.ritualHeader > * { pointer-events: auto; } /* Re-enable clicks on buttons */
+
+.helixIndicator {
+  position: relative; width: 30px; height: 30px;
+  display: flex; justify-content: center; align-items: center;
+}
+
+.helixArm {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: rotate 20s linear infinite;
+  mix-blend-mode: screen;
+}
+.helixArm:nth-child(1) { background: var(--accent-cyan); animation-delay: 0s; }
+.helixArm:nth-child(2) { background: var(--accent-magenta); animation-delay: -6.6s; }
+.helixArm:nth-child(3) { background: var(--accent-gold); animation-delay: -13.3s; }
+
+.timer {
+  padding: 8px 16px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+/* =========================================
+   6. PROMPT SCREEN
+   ========================================= */
+.promptScreen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  z-index: 10;
+  padding: 20px;
+  background: radial-gradient(circle at center, #0f1115 0%, #050507 80%);
+  text-align: center;
+}
+
+.ritualTitle {
+  font-size: clamp(24px, 5vw, 42px); /* Responsive font size */
+  font-weight: 800;
+  background: var(--grad-rainbow);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 24px;
+  font-family: var(--font-display);
+  animation: pulse 4s infinite;
+}
+
+.ritualInstruction {
+  max-width: 500px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 16px;
 }
 
 .uploadZone {
-  margin: 20px 0; padding: 24px; border: 2px dashed rgba(74, 220, 128, 0.3);
-  border-radius: 16px; background: rgba(0,0,0,0.3); width: 80%; max-width: 400px;
+  margin: 24px 0; padding: 32px;
+  border: 2px dashed rgba(74, 220, 128, 0.3);
+  border-radius: 16px;
+  background: rgba(0,0,0,0.3);
+  width: 100%; max-width: 420px;
+  transition: border-color 0.3s;
+}
+.uploadZone:hover { border-color: var(--primary); }
+
+.artistToggle {
+  margin-top: 16px;
+  color: var(--text-muted);
+  font-size: 14px;
+  display: flex; align-items: center; gap: 8px;
 }
 
-/* Buttons */
-.uploadBtn {
-  padding: 14px 28px; background: linear-gradient(90deg, #4ade80, #f87171);
-  border: none; color: black; font-weight: 800; cursor: pointer;
-  margin: 10px 0; border-radius: 12px; font-size: 16px; transition: all 0.3s;
+/* =========================================
+   7. MAIN CANVAS & BOTTOM BAR
+   ========================================= */
+.mainCanvas {
+  display: block; /* Managed via React/JS usually, but block by default */
+  width: 100%; height: 100%;
+  opacity: 0;
+  transition: opacity 1s ease;
 }
-.uploadBtn:hover { transform: scale(1.03); box-shadow: 0 0 20px rgba(74, 220, 128, 0.4); }
-
-.artistToggle { display: block; margin-top: 16px; color: #ccc; font-size: 14px; }
-.artistToggle input { margin-right: 8px; }
-
-/* Canvas & Bottom Bar */
-.mainCanvas { display: none; width: 100%; height: 100%; }
+.mainCanvas.active { opacity: 1; }
 
 .bottomBar {
   position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 16px 30px; display: none; justify-content: space-between; align-items: center;
-  z-index: 50; background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+  padding: 20px 30px;
+  display: flex; justify-content: space-between; align-items: center;
+  z-index: var(--z-ui);
+  background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, transparent 100%);
 }
-
-/* FIXED: Changed ID selector to class to match JSX */
-.libraryBtnRitual {
-  padding: 10px 20px; background: rgba(74, 220, 128, 0.2);
-  border: 1px solid #4ade80; color: #4ade80; border-radius: 10px;
-  cursor: pointer; font-weight: 600; font-size: 14px;
-}
-
-.progressIndicator {
-  color: #ccc; font-size: 14px; background: rgba(0,0,0,0.7);
-  padding: 8px 16px; border-radius: 12px; border: 1px solid rgba(74, 220, 128, 0.3); display: none;
-}
-
-.completionBtn {
-  padding: 14px 28px; background: linear-gradient(90deg, #4ade80, #f87171);
-  border: none; color: black; font-weight: 800; cursor: pointer; border-radius: 12px;
-  font-size: 16px; transition: all 0.3s; box-shadow: 0 10px 30px rgba(74, 220, 128, 0.4);
-}
-.completionBtn:hover { transform: scale(1.05); box-shadow: 0 15px 40px rgba(74, 220, 128, 0.6); }
 
 .guidanceHint {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  color: rgba(74, 220, 128, 0.9); font-size: 18px; font-weight: 600; text-align: center;
-  max-width: 80%; padding: 20px; background: rgba(74, 220, 128, 0.1);
-  border-radius: 20px; border: 1px solid rgba(74, 220, 128, 0.2);
-  opacity: 0; transition: opacity 1s; z-index: 1000; pointer-events: none;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(74, 220, 128, 0.1);
+  border: 1px solid rgba(74, 220, 128, 0.3);
+  backdrop-filter: blur(4px);
+  padding: 20px;
+  border-radius: 16px;
+  color: var(--primary);
+  font-weight: 600;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
 }
 
-/* ===== REVEAL SCREEN ===== */
-.revealScreen {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  display: none; flex-direction: column; align-items: center; justify-content: flex-start;
-  padding-top: 40px; background: #000; overflow-y: auto; z-index: 200; text-align: center;
+/* =========================================
+   8. REVEAL & DETAIL MODALS
+   ========================================= */
+.revealScreen, .printDetailModal, .libraryModal {
+  position: absolute; inset: 0;
+  background: var(--bg-panel);
+  z-index: var(--z-overlay);
+  display: flex; flex-direction: column;
+  padding: 40px 20px;
+  overflow-y: auto;
+  animation: fadeIn 0.4s ease-out;
 }
 
-.crystallizedTitle {
-  font-size: 32px; font-weight: 800; font-family: var(--font-orbitron), 'Orbitron', sans-serif;
-  background: linear-gradient(90deg, #4ade80, #f87171, #fb923c, #60a5fa, #c084fc, #fde047);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  margin: 0 0 30px 0; animation: pulse 4s infinite;
-}
+.libraryModal { z-index: var(--z-modal); }
 
 .printContainer {
-  display: flex; flex-direction: column; align-items: center; gap: 30px;
-  width: 100%; max-width: 900px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 32px; width: 100%; max-width: 1000px; margin: 0 auto;
 }
 
 .visualPrint {
-  max-width: 90%; max-height: 50vh; border: 1px solid rgba(74, 220, 128, 0.3);
-  border-radius: 16px; box-shadow: 0 0 40px rgba(74, 220, 128, 0.25);
+  width: 100%; max-width: 500px;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border: 1px solid rgba(74, 220, 128, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 0 50px rgba(74, 220, 128, 0.15);
 }
-
-.playerContainer {
-  display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; max-width: 560px;
-}
-
-.audioPlayer { width: 100%; max-width: 560px; }
 
 .controlButtons {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; width: 100%;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
+  width: 100%; margin-top: 20px;
 }
 
 .controlButtons button {
-  flex: 1; min-width: 130px; padding: 12px 20px; border-radius: 12px;
-  font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s;
+  flex: 1; min-width: 140px;
+  padding: 12px; border-radius: 10px;
+  border: 1px solid transparent;
+  background: rgba(255,255,255,0.05);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: 0.2s;
+}
+.controlButtons button:hover { background: rgba(255,255,255,0.1); }
+
+/* =========================================
+   9. LIBRARY GRID SYSTEM
+   ========================================= */
+.libraryHeader {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px;
 }
 
-.controlButtons .rewardBtn { background: rgba(74, 220, 128, 0.2); border: 1px solid #4ade80; color: #4ade80; }
-.controlButtons .downloadBtn { background: rgba(96, 165, 250, 0.2); border: 1px solid #60a5fa; color: #60a5fa; }
-
-.controlButtons button:hover { transform: scale(1.06); box-shadow: 0 0 25px rgba(74, 220, 128, 0.5); }
-
-/* Landscape Layout */
-@media (orientation: landscape) {
-  .printContainer { flex-direction: row; justify-content: center; align-items: flex-start; gap: 50px; }
-  .visualPrint { max-width: 50%; max-height: 75vh; }
-  .controlButtons { flex-wrap: nowrap; }
+.libraryTabs { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.libraryTab {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  color: var(--text-muted);
+  cursor: pointer;
+  border: 1px solid transparent;
 }
-
-/* ===== LIBRARY MODAL ===== */
-.libraryModal {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: #050508; display: none; flex-direction: column;
-  z-index: 300; padding: 20px; box-sizing: border-box;
+.libraryTab.active {
+  background: rgba(74, 220, 128, 0.15);
+  border-color: var(--primary);
+  color: var(--text-main);
 }
-
-.libraryHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.libraryClose { padding: 8px 16px; background: rgba(248, 113, 113, 0.2); border: 1px solid #f87171; color: #f87171; border-radius: 6px; cursor: pointer; }
-
-.libraryTabs { display: flex; margin-bottom: 20px; flex-wrap: wrap; gap: 8px; }
-.libraryTab { padding: 10px 20px; background: rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer; color: #ccc; position: relative; }
-
-/* Combined selector for active state */
-.libraryTab.active { background: rgba(74, 220, 128, 0.3); color: white; }
-.libraryTab .count { font-size: 11px; opacity: 0.7; }
 
 .printGrid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px; overflow-y: auto; flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  width: 100%;
 }
 
 .printCard {
-  border-radius: 8px; overflow: hidden; cursor: pointer; position: relative; background: #111;
-  transition: transform 0.2s;
+  position: relative;
+  aspect-ratio: 1/1;
+  background: #111;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: transform 0.2s, border-color 0.2s;
 }
-.printCard:hover { transform: scale(1.03); }
-.printCard img { width: 100%; display: block; height: 120px; object-fit: cover; }
+.printCard:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  z-index: 2;
+}
+.printCard img { width: 100%; height: 100%; object-fit: cover; }
 
-.printCard .meta { padding: 6px 8px; font-size: 12px; color: #ddd; }
-.printCard .meta .name { font-weight: 600; color: #4ade80; }
-
-.privacyBadge { position: absolute; top: 4px; right: 4px; font-size: 12px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; }
-
-/* FIXED: Hover logic for actions */
 .cardActions {
-  position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.9);
-  display: flex; padding: 4px; gap: 4px; opacity: 0; transition: opacity 0.3s;
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,0.9);
+  padding: 8px;
+  display: flex; gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
-/* When hovering the card, show the actions container */
 .printCard:hover .cardActions { opacity: 1; }
 
-.printCard .cardActions button {
-  flex: 1; background: rgba(74, 220, 128, 0.2); border: 1px solid #4ade80;
-  color: #4ade80; font-size: 12px; cursor: pointer; border-radius: 4px; padding: 4px;
+/* =========================================
+   10. MEDIA QUERIES
+   ========================================= */
+@media (min-width: 768px) and (orientation: landscape) {
+  .printContainer {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .visualPrint { max-width: 45vh; }
+  .playerContainer { flex: 1; max-width: 500px; }
 }
 
-.emptyState { grid-column: 1 / -1; text-align: center; padding: 40px; color: #666; }
-
-
-/* 7. ANIMATIONS */
-@keyframes rotate {
-    0% { transform: rotate(0deg) scale(1); }
-    100% { transform: rotate(360deg) scale(1); }
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 0.9; }
-    50% { opacity: 1; filter: brightness(1.3); }
-}
-
-@media (orientation: landscape) {
-    .printContainer, .printContainerDetail { flex-direction: row; justify-content: center; align-items: flex-start; gap: 50px; }
-    .visualPrint, .visualPrintDetail { max-width: 50%; max-height: 75vh; }
-    .controlButtons { flex-wrap: nowrap; }
+@media (max-width: 600px) {
+  .ritualTitle { font-size: 28px; }
+  .uploadZone { padding: 16px; }
+  .bottomBar { padding: 12px; }
+  .controlButtons button { min-width: 100%; }
 }
