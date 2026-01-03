@@ -475,6 +475,32 @@
 .detailClose { padding: 8px 16px; background: rgba(248, 113, 113, 0.2); border: 1px solid #f87171; color: #f87171; border-radius: 6px; cursor: pointer; flex-shrink: 0; }
 
 /* FIXED: Removed # symbol */
-.printContainerDetail { display: flex; flex-direction: column; align-items: center; gap: 30px; width: 100%; max-width: 900px; flex: 1; min-height: 0; }
-.visualPrintDetail { max-width: 90%; max-height: 40vh; border: 1px solid rgba(74, 220, 128, 0.3); border-radius: 16px; box-shadow: 0 0 40px rgba(74, 220, 128, 0.25); object-fit: contain; }
-.playerContainerDetail { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; max-width: 560px; flex-shrink: 0; }
+.printContainerDetail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  width: 100%;
+  max-width: 900px;
+  flex: 1;
+  min-height: 0;
+}
+
+.visualPrintDetail {
+  max-width: 90%;
+  max-height: 40vh;
+  border: 1px solid rgba(74, 220, 128, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 0 40px rgba(74, 220, 128, 0.25);
+  object-fit: contain;
+}
+
+.playerContainerDetail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 560px;
+  flex-shrink: 0;
+}
