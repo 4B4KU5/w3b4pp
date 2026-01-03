@@ -440,45 +440,41 @@
             width: 100%;
             max-width: 900px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-shrink: 0;
-        }
-        .detailClose {
-            padding: 8px 16px;
-            background: rgba(248, 113, 113, 0.2);
-            border: 1px solid #f87171;
-            color: #f87171;
-            border-radius: 6px;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-        .printContainerDetail {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 30px;
-            width: 100%;
-            max-width: 900px;
-            flex: 1;
-            min-height: 0;
-        }
-        .visualPrintDetail {
-            max-width: 90%;
-            max-height: 40vh;
-            border: 1px solid rgba(74, 220, 128, 0.3);
-            border-radius: 16px;
-            box-shadow: 0 0 40px rgba(74, 220, 128, 0.25);
-            object-fit: contain;
-        }
-        .playerContainerDetail {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            width: 100%;
-            max-width: 560px;
-            flex-shrink: 0;
-        }
+/* ... keep all your existing styles above ... */
 
+/* LIBRARY */
+.libraryModal {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: #050508; display: none; flex-direction: column;
+    z-index: 300; padding: 20px; box-sizing: border-box;
+}
+.libraryHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.libraryClose { padding: 8px 16px; background: rgba(248, 113, 113, 0.2); border: 1px solid #f87171; color: #f87171; border-radius: 6px; cursor: pointer; }
+.libraryTabs { display: flex; margin-bottom: 20px; flex-wrap: wrap; gap: 8px; }
+.libraryTab { padding: 10px 20px; background: rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer; color: #ccc; position: relative; }
+.libraryTab.active { background: rgba(74, 220, 128, 0.3); color: white; } /* Combined selector */
+.libraryTab .count { font-size: 11px; opacity: 0.7; }
+.printGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; overflow-y: auto; flex: 1; }
+.printCard { border-radius: 8px; overflow: hidden; cursor: pointer; position: relative; background: #111; transition: transform 0.2s; }
+.printCard:hover { transform: scale(1.03); }
+.printCard img { width: 100%; display: block; height: 120px; object-fit: cover; }
+.printCard .meta { padding: 6px 8px; font-size: 12px; color: #ddd; }
+.printCard .meta .name { font-weight: 600; color: #4ade80; }
+.privacyBadge { position: absolute; top: 4px; right: 4px; font-size: 12px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; }
+
+/* ACTIONS FIX: Changed .actions to .cardActions to match JSX */
+.cardActions { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.9); display: flex; padding: 4px; gap: 4px; opacity: 0; transition: opacity 0.3s; }
+.printCard:hover .cardActions { opacity: 1; } /* FIXED SELECTOR */
+
+.printCard .cardActions button { flex: 1; background: rgba(74, 220, 128, 0.2); border: 1px solid #4ade80; color: #4ade80; font-size: 12px; cursor: pointer; border-radius: 4px; padding: 4px; }
+.empty-state { grid-column: 1 / -1; text-align: center; padding: 40px; color: #666; }
+
+/* PRINT DETAIL MODAL */
+.printDetailModal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; flex-direction: column; align-items: center; justify-content: flex-start; overflow-y: auto; z-index: 400; text-align: center; padding: 20px; box-sizing: border-box; }
+.detailHeader { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
+.detailClose { padding: 8px 16px; background: rgba(248, 113, 113, 0.2); border: 1px solid #f87171; color: #f87171; border-radius: 6px; cursor: pointer; flex-shrink: 0; }
+
+/* FIXED: Removed # symbol */
+.printContainerDetail { display: flex; flex-direction: column; align-items: center; gap: 30px; width: 100%; max-width: 900px; flex: 1; min-height: 0; }
+.visualPrintDetail { max-width: 90%; max-height: 40vh; border: 1px solid rgba(74, 220, 128, 0.3); border-radius: 16px; box-shadow: 0 0 40px rgba(74, 220, 128, 0.25); object-fit: contain; }
+.playerContainerDetail { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%; max-width: 560px; flex-shrink: 0; }
