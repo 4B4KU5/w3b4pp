@@ -1,4 +1,4 @@
-import type { Metadata } from 'next/metadata';
+import type { Metadata } from 'next';
 import { Inter, Orbitron } from 'next/font/google';
 import './globals.css'; // 1. Moved here from outside (Next.js best practice)
 
