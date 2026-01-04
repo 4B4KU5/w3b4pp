@@ -7,14 +7,13 @@ import { Button } from './ui/button';
 
 // --- Component Props (Update based on page.tsx implementation) ---
 interface RitualCanvasProps {
-  audioBuffer: AudioBuffer;
-  isPaused: boolean;
-  flatMode: boolean; // New prop for initial EQ state
-  onComplete: (result: { imageDataUrl: string; audioBlob: Blob }) => void;
-  onPause: () => void; // Keeping these just in case parent needs sync
-  onResume: () => void;
+  audioBuffer: AudioBuffer
+  isPaused: boolean
+  flatMode: boolean
+  onComplete: (result: { imageDataUrl: string; audioBlob: Blob }) => void
+  onPause?: () => void // <-- Add this (optional)
+  onResume?: () => void // <-- Add this (optional)
 }
-
 export function RitualCanvas({ 
     audioBuffer, 
     isPaused, 
