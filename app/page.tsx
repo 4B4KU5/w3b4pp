@@ -1,5 +1,7 @@
-'use client';
+"use client"; // <--- ADD THIS LINE AS THE VERY FIRST LINE
 
+import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import styles from './Ritual.module.css';
 
