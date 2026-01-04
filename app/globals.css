@@ -1,4 +1,25 @@
 /* app/globals.css */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#050505] text-cyan-50 font-sans;
+  }
+  h1, h2, h3 {
+    @apply font-['Orbitron'] text-cyan-300;
+  }
+}
+
+/* Neon Glow Utility */
+.neon-box {
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+}
 :root {
   /* Colors */
   --color-bg-primary: 0 0% 10%;
