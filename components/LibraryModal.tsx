@@ -18,10 +18,10 @@ const LIBRARY: LibraryItem[] = [
 interface LibraryModalProps {
   isOpen: boolean
   onClose: () => void
-  onSelectPreset: (prompt: string) => void
+  onSelectPreset?: (prompt: string) => void
 }
 
-export function LibraryModal({ isOpen, onClose, onSelectPreset }: LibraryModalProps) {
+export function LibraryModal({ isOpen, onClose, onSelectPreset? }: LibraryModalProps) {
   if (!isOpen) return null
 
   return (
@@ -38,7 +38,7 @@ export function LibraryModal({ isOpen, onClose, onSelectPreset }: LibraryModalPr
               variant="ghost"
               className="w-full justify-start h-16 mb-2 text-left hover:bg-accent/10"
               onClick={() => {
-                onSelectPreset(item.prompt)
+                onSelectPreset?(item.prompt)
                 onClose()
               }}
             >
