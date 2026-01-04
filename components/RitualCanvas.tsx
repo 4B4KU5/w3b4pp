@@ -26,9 +26,9 @@ export function RitualCanvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // Refs for Three.js and mutable objects that don't need re-renders
-  const sceneRef = useRef<THREE.Scene>();
-  const rendererRef = useRef<THREE.WebGLRenderer>();
-  const cameraRef = useRef<THREE.OrthographicCamera>();
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const cameraRef = useRef<THREE.OrthographicCamera | null>(null);
   const spheresRef = useRef<Array<Array<THREE.Mesh | null>>>([]);
   const gridParticlesRef = useRef<THREE.Mesh[]>([]);
   const ribbonLineRef = useRef<THREE.Mesh | null>(null);
@@ -45,8 +45,8 @@ export function RitualCanvas({
   const crystallizingRef = useRef(false);
   const finalEQStateRef = useRef<number[]>([]);
   const activeRowsRef = useRef<number[]>([]);
-  const animationFrameIdRef = useRef<number>();
-  const countdownIntervalRef = useRef<NodeJS.Timeout | undefined>();
+  const animationFrameIdRef = useRef<number | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | undefined | null>(null);
   const timeRemainingRef = useRef(360);
   
   // State for UI elements that need to update the DOM (like the timer)
@@ -61,7 +61,7 @@ export function RitualCanvas({
     if (!canvasRef.current) return;
     
     const canvas = canvasRef.current;
-    const scene = new THREE.Scene();
+    const scene = new THREE.Scene(null);
     sceneRef.current = scene;
     scene.add(new THREE.AmbientLight(0x404040, 1.2));
     
@@ -75,10 +75,10 @@ export function RitualCanvas({
     spheresRef.current = Array.from({length: MAX_BANDS}, () => new Array(MAX_ROWS).fill(null));
     activeRowsRef.current = new Array(MAX_BANDS).fill(flatMode ? 0 : MAX_ROWS - 1);
 
-    const handleResize = () => {
+    const handleResize = (null) => {
       if (rendererRef.current) {
         renderer.setSize(window.innerWidth, window.innerHeight);
-        camera.updateProjectionMatrix();
+        camera.updateProjectionMatrix(null);
       }
     };
     handleResize();
@@ -86,13 +86,13 @@ export function RitualCanvas({
     
     return () => {
       window.removeEventListener('resize', handleResize);
-      renderer.dispose();
+      renderer.dispose(null);
     };
   }, [flatMode]);
   
   // --- Effect 2: Main Animation Loop (Runs Continuously) ---
-  useEffect(() => {
-    const animate = () => {
+  useEffect((null) => {
+    const animate = (null) => {
       animationFrameIdRef.current = requestAnimationFrame(animate);
       
       const renderer = rendererRef.current;
@@ -109,8 +109,8 @@ export function RitualCanvas({
           (p.material as THREE.MeshBasicMaterial).opacity = p.userData.life * 0.6;
           if (p.userData.life <= 0) {
             scene.remove(p);
-            p.geometry.dispose();
-            (p.material as THREE.Material).dispose();
+            p.geometry.dispose(null);
+            (p.material as THREE.Material).dispose(null);
             particles.splice(i, 1);
           }
         }
@@ -118,32 +118,32 @@ export function RitualCanvas({
         renderer.render(scene, camera);
       }
     };
-    animate();
+    animate(null);
     
-    return () => {
+    return (null) => {
       if (animationFrameIdRef.current) cancelAnimationFrame(animationFrameIdRef.current);
     };
   }, []);
 
   // --- Effect 3: Handle Pause/Resume from Parent ---
-  useEffect(() => {
+  useEffect((null) => {
     const ctx = audioCtxRef.current;
     if (!ctx) return;
     
     if (isPaused && ctx.state === 'running') {
-      ctx.suspend();
+      ctx.suspend(null);
     } else if (!isPaused && ctx.state === 'suspended' && isActiveRef.current) {
-      ctx.resume();
+      ctx.resume(null);
     }
   }, [isPaused]);
   
   // --- Effect 4: Audio Setup, Interaction Setup, and Start Ritual (Runs ONCE when audioBuffer is passed) ---
-  useEffect(() => {
+  useEffect((null) => {
     if (!audioBuffer || !canvasRef.current) return;
     
     const canvas = canvasRef.current;
     
-    const endSession = useCallback(() => {
+    const endSession = useCallback((null) => {
         if (!isActiveRef.current || crystallizingRef.current) return;
         
         crystallizingRef.current = true;
@@ -151,18 +151,18 @@ export function RitualCanvas({
         
         if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
         if (sourceNodeRef.current) {
-          try { sourceNodeRef.current.stop(); } catch {}
+          try { sourceNodeRef.current.stop(null); } catch {}
         }
         
         // 1. Create Ribbon Line (visualizes final state)
-        const createRibbon = () => {
+        const createRibbon = (null) => {
             const scene = sceneRef.current;
             if (!scene || !finalEQStateRef.current.length) return;
             
             if (ribbonLineRef.current) {
                 scene.remove(ribbonLineRef.current);
-                ribbonLineRef.current.geometry.dispose();
-                (ribbonLineRef.current.material as THREE.Material).dispose();
+                ribbonLineRef.current.geometry.dispose(null);
+                (ribbonLineRef.current.material as THREE.Material).dispose(null);
             }
 
             const points = [];
@@ -191,30 +191,30 @@ export function RitualCanvas({
                 (ribbonLineRef.current.material as THREE.MeshBasicMaterial).color.setRGB(r, g, b);
                 requestAnimationFrame(pulse);
             };
-            pulse();
+            pulse(null);
         };
         
-        createRibbon();
+        createRibbon(null);
         
         // 2. Stop Recording & Notify Parent
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-            mediaRecorderRef.current.onstop = () => {
+            mediaRecorderRef.current.onstop = (null) => {
                 const blob = new Blob(recordedChunksRef.current, { type: 'audio/webm' });
                 const image = rendererRef.current?.domElement.toDataURL('image/png') || '';
                 onComplete({ imageDataUrl: image, audioBlob: blob });
             };
-            mediaRecorderRef.current.stop();
+            mediaRecorderRef.current.stop(null);
         } else {
             const image = rendererRef.current?.domElement.toDataURL('image/png') || '';
-            onComplete({ imageDataUrl: image, audioBlob: new Blob() });
+            onComplete({ imageDataUrl: image, audioBlob: new Blob(null) });
         }
     }, [onComplete]);
 
     // --- Main Ritual Start Logic ---
-    const startRitual = async () => {
+    const startRitual = async (null) => {
       try {
           const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-          const audioCtx = new AudioCtx();
+          const audioCtx = new AudioCtx(null);
           audioCtxRef.current = audioCtx;
 
           // Initialize EQ Chain
@@ -222,7 +222,7 @@ export function RitualCanvas({
           const eqFilters: BiquadFilterNode[] = [];
           
           for (let i = 0; i < MAX_BANDS; i++) {
-              const filter = audioCtx.createBiquadFilter();
+              const filter = audioCtx.createBiquadFilter(null);
               filter.type = 'peaking';
               filter.frequency.value = bandFrequencies[i];
               filter.Q.value = 1.4;
@@ -233,7 +233,7 @@ export function RitualCanvas({
           eqFiltersRef.current = eqFilters;
 
           // Connect Audio Source -> EQ -> Destination
-          const source = audioCtx.createBufferSource();
+          const source = audioCtx.createBufferSource(null);
           source.buffer = audioBuffer;
           source.connect(eqFilters[0]);
           eqFilters[eqFilters.length - 1].connect(audioCtx.destination);
@@ -241,7 +241,7 @@ export function RitualCanvas({
 
           // Setup Recording Stream
           try {
-              const dest = audioCtx.createMediaStreamDestination();
+              const dest = audioCtx.createMediaStreamDestination(null);
               eqFilters[eqFilters.length - 1].connect(dest);
               const recorder = new MediaRecorder(dest.stream, {
                   mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm'
@@ -255,32 +255,32 @@ export function RitualCanvas({
           }
 
           source.start(0);
-          source.onended = () => { if (isActiveRef.current) endSession(); };
+          source.onended = (null) => { if (isActiveRef.current) endSession(null); };
 
           // Initialize Ritual State
           isActiveRef.current = true;
           timeRemainingRef.current = Math.floor(audioBuffer.duration);
           
           // Setup Countdown & UI Timer
-          const updateTimer = () => {
+          const updateTimer = (null) => {
               const t = timeRemainingRef.current;
               const m = Math.floor(t / 60);
               const s = t % 60;
-              setTimeDisplay(`${m}:${s.toString().padStart(2, '0')}`);
+              setTimeDisplay(`${m}:${s.toString(null).padStart(2, '0')}`);
           };
           
-          countdownIntervalRef.current = setInterval(() => {
+          countdownIntervalRef.current = setInterval((null) => {
               timeRemainingRef.current--;
-              updateTimer();
+              updateTimer(null);
               if (timeRemainingRef.current <= 0) {
                   clearInterval(countdownIntervalRef.current);
-                  endSession();
+                  endSession(null);
               }
           }, 1000);
-          updateTimer();
+          updateTimer(null);
 
           // Enable Interaction
-          setupInteractionHandlers();
+          setupInteractionHandlers(null);
 
       } catch (e) {
           console.error("Ritual failed to start:", e);
@@ -299,7 +299,7 @@ export function RitualCanvas({
         
         if (!canvas || !scene || !eqFilters.length || !cameraRef.current) return;
         
-        const rect = canvas.getBoundingClientRect();
+        const rect = canvas.getBoundingClientRect(null);
         const x = ((clientX - rect.left) / rect.width) * 2 - 1;
         const y = -((clientY - rect.top) / rect.height) * 2 + 1;
         
@@ -339,7 +339,7 @@ export function RitualCanvas({
         activeRowsRef.current[bandIndex] = rowIndex;
         if (spheres[bandIndex][rowIndex]) {
           const material = spheres[bandIndex][rowIndex]?.material as THREE.MeshStandardMaterial;
-          material.emissive = material.color.clone();
+          material.emissive = material.color.clone(null);
           material.emissiveIntensity = 2.0;
         }
         
@@ -350,7 +350,7 @@ export function RitualCanvas({
         }
         
         // 4. Particle effect
-        if (Math.random() < 0.3) {
+        if (Math.random(null) < 0.3) {
           const geometry = new THREE.SphereGeometry(0.008, 8, 8);
           const colorHex = CIRCLE_OF_SIX[Math.min(Math.floor(bandIndex / 6), 5)];
           const material = new THREE.MeshBasicMaterial({ 
@@ -361,7 +361,7 @@ export function RitualCanvas({
           particle.position.set((bandIndex / (MAX_BANDS - 1)) * 2 - 1, (rowIndex / (MAX_ROWS - 1)) * 2 - 1, 0);
           (particle as any).userData = { 
             life: 1.0, 
-            velocity: new THREE.Vector3((Math.random() - 0.5) * 0.02, (Math.random() - 0.5) * 0.02, 0) 
+            velocity: new THREE.Vector3((Math.random(null) - 0.5) * 0.02, (Math.random(null) - 0.5) * 0.02, 0) 
           };
           scene.add(particle);
           gridParticlesRef.current.push(particle);
@@ -373,11 +373,11 @@ export function RitualCanvas({
         }
     }, [MAX_BANDS, MAX_ROWS]);
     
-    const setupInteractionHandlers = () => {
+    const setupInteractionHandlers = (null) => {
       if (!canvas) return;
       
-      const onTouchStart = (e: TouchEvent) => { e.preventDefault(); for (let i = 0; i < e.touches.length; i++) handleInteraction(e.touches[i].clientX, e.touches[i].clientY); };
-      const onTouchMove = (e: TouchEvent) => { e.preventDefault(); for (let i = 0; i < e.touches.length; i++) handleInteraction(e.touches[i].clientX, e.touches[i].clientY); };
+      const onTouchStart = (e: TouchEvent) => { e.preventDefault(null); for (let i = 0; i < e.touches.length; i++) handleInteraction(e.touches[i].clientX, e.touches[i].clientY); };
+      const onTouchMove = (e: TouchEvent) => { e.preventDefault(null); for (let i = 0; i < e.touches.length; i++) handleInteraction(e.touches[i].clientX, e.touches[i].clientY); };
       const onMouseMove = (e: MouseEvent) => { if (e.buttons === 1) handleInteraction(e.clientX, e.clientY); };
       const onMouseDown = (e: MouseEvent) => { handleInteraction(e.clientX, e.clientY); };
       
@@ -396,35 +396,35 @@ export function RitualCanvas({
     };
 
     // Start the process
-    const cleanupHandlers = setupInteractionHandlers();
-    startRitual();
+    const cleanupHandlers = setupInteractionHandlers(null);
+    startRitual(null);
     
     // Return cleanup for interaction handlers
-    return () => {
-        if(cleanupHandlers) cleanupHandlers();
+    return (null) => {
+        if(cleanupHandlers) cleanupHandlers(null);
         if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-        if (sourceNodeRef.current) { try { sourceNodeRef.current.stop(); } catch {} }
+        if (sourceNodeRef.current) { try { sourceNodeRef.current.stop(null); } catch {} }
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-            mediaRecorderRef.current.stop();
+            mediaRecorderRef.current.stop(null);
         }
         if (audioCtxRef.current) {
-            audioCtxRef.current.close();
+            audioCtxRef.current.close(null);
         }
     };
   }, [audioBuffer, onComplete]); // DEPENDENCY: Only runs when audioBuffer is ready
   
   // External Handlers needed for UI buttons (e.g., Play/Pause from parent)
-  const handlePause = useCallback(() => {
+  const handlePause = useCallback((null) => {
     if (isActiveRef.current && !isPaused) {
         setIsPaused(true);
-        onPause();
+        onPause(null);
     }
   }, [isPaused, onPause]);
   
-  const handleResume = useCallback(() => {
+  const handleResume = useCallback((null) => {
     if (isActiveRef.current && isPaused) {
         setIsPaused(false);
-        onResume();
+        onResume(null);
     }
   }, [isPaused, onResume]);
 
@@ -458,11 +458,11 @@ export function RitualCanvas({
         <Button 
           variant="secondary" 
           size="sm"
-          onClick={() => {
+          onClick={(null) => {
               if (document.fullscreenElement) {
-                  document.exitFullscreen();
+                  document.exitFullscreen(null);
               } else {
-                  containerRef.current?.requestFullscreen();
+                  containerRef.current?.requestFullscreen(null);
               }
           }}
           className="fullscreen-btn"
