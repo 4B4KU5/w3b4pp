@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useAccount, useConnect } from "wagmi";
-import { InjectedConnector } from "wagmi/connectors/injected";
-import { FaWallet } from "react-icons/fa";
+import { FaWallet, FaEthereum } from "react-icons/fa";
 import { FiRefreshCw } from "react-icons/fi";
-import { FaEthereum } from "react-icons/fa";
 
 // --- Types ---
 interface NFTMetadata {
@@ -20,16 +18,12 @@ interface Token {
   metadata: NFTMetadata;
 }
 
-// --- Constants (Ensure these match your config) ---
-const CONTRACT_ADDRESS = "0x26f8Ea024E79850D2b0aB28c176eB00655671776"; // Assuming this is correct based on context
-
-// --- Component ---
-
-const injected = new InjectedConnector();
+// --- Constants ---
+const CONTRACT_ADDRESS = "0x26f8Ea024E79850D2b0aB28c176eB00655671776"; 
 
 export default function Home() {
   const { address, isConnected } = useAccount();
-  const { connect } = useConnect();
+  const { connectors, connect } = useConnect();
 
   const [nfts, setNfts] = useState<Token[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +40,7 @@ export default function Home() {
     setNfts([]);
 
     try {
-      // 1. Fetch Token IDs owned by the address
+      // 1. Fetch Token IDs
       const ownedTokensResponse = await fetch(
         `/api/getOwnedTokens?address=${address.toLowerCase()}`
       );
@@ -65,7 +59,7 @@ export default function Home() {
         return;
       }
 
-      // 2. Fetch Metadata for each Token ID concurrently
+      // 2. Fetch Metadata
       const metadataPromises = tokenIds.map(async (tokenId) => {
         const metadataResponse = await fetch(
           `/api/getNFTMetadata?contractAddress=${CONTRACT_ADDRESS}&tokenId=${tokenId}`
@@ -73,12 +67,11 @@ export default function Home() {
 
         if (!metadataResponse.ok) {
           console.error(`Failed to fetch metadata for Token ID ${tokenId}`);
-          return null; // Return null if metadata fetch fails for an individual token
+          return null;
         }
 
         const metadata: NFTMetadata = await metadataResponse.json();
 
-        // Basic check to ensure metadata has essential fields
         if (!metadata?.name || !metadata?.image) {
             return null;
         }
@@ -90,8 +83,6 @@ export default function Home() {
       });
 
       const results = await Promise.all(metadataPromises);
-
-      // Filter out any null results (tokens that failed metadata fetching)
       const validNFTs = results.filter((nft): nft is Token => nft !== null);
       
       setNfts(validNFTs);
@@ -104,20 +95,24 @@ export default function Home() {
     }
   };
 
-  // Initial load when the component mounts and wallet is connected
   useEffect(() => {
     if (isConnected && address) {
       fetchNFTs();
     } else {
-        // Clear state if wallet disconnects
         setNfts([]);
         setError(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected, address]); // Explicitly including dependencies for clarity
+  }, [isConnected, address]);
 
   const handleConnectWallet = () => {
-    connect({ connector: injected });
+    // In Wagmi v2, we grab the first available connector (usually injected/metamask)
+    const connector = connectors[0];
+    if (connector) {
+        connect({ connector });
+    } else {
+        alert("No wallet connector found. Please install MetaMask.");
+    }
   };
 
   // --- Rendering Logic ---
@@ -177,7 +172,7 @@ export default function Home() {
         <div className="text-center text-gray-400 bg-gray-800/50 p-6 rounded-lg border border-gray-700">
           <FaEthereum className="mx-auto h-10 w-10 mb-3 text-gray-500" />
           <h3 className="text-xl font-semibold mb-2">No NFTs Found</h3>
-          <p>It looks like you don't own any W3B4PPs at this address, or fetching failed.</p>
+          <p>It looks like you don't own any W3B4PPs at this address.</p>
         </div>
       );
     }
@@ -207,7 +202,6 @@ export default function Home() {
                   ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                   : "bg-gray-700 hover:bg-gray-600 text-white"
               }`}
-              title="Refresh NFTs"
             >
               <FiRefreshCw className={isLoading ? "animate-spin" : ""} />
             </button>
@@ -227,29 +221,22 @@ export default function Home() {
 }
 
 // --- NFT Card Component ---
-
 interface NFTCardProps {
   token: Token;
 }
 
 const NFTCard: React.FC<NFTCardProps> = ({ token }) => {
   const { name, image, attributes } = token.metadata;
-
-  // Safely access the image URL, defaulting to a placeholder if somehow missing
   const imageUrl = image || "/placeholder.png"; 
 
   return (
     <div className="bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-700 transition duration-300 hover:shadow-indigo-500/30 hover:scale-[1.02] flex flex-col h-full">
       <div className="relative pt-[100%] bg-gray-700">
-        {/* Use object-cover to handle image sizing */}
         <img
           src={imageUrl}
           alt={name}
           className="absolute inset-0 w-full h-full object-cover"
-          // Basic error handling for broken images
-          onError={(e) => {
-            e.currentTarget.src = "/placeholder.png"; 
-          }}
+          onError={(e) => { e.currentTarget.src = "/placeholder.png"; }}
         />
         <div className="absolute top-2 left-2 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
             #{token.tokenId}
@@ -257,9 +244,7 @@ const NFTCard: React.FC<NFTCardProps> = ({ token }) => {
       </div>
       <div className="p-4 flex flex-col flex-grow">
         <h3 className="text-lg font-bold text-white mb-1 truncate">{name}</h3>
-        
         <div className="mt-auto">
-            {/* Displaying a few key attributes */}
             {attributes?.slice(0, 3).map((attr, index) => (
                 <div key={index} className="text-xs text-gray-400 flex justify-between py-0.5 border-t border-gray-700 last:border-b-0">
                     <span className="font-medium text-gray-300">{attr.trait_type}:</span>
