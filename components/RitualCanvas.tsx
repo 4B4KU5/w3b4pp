@@ -451,7 +451,7 @@ export function RitualCanvas({
         </Button>
         <Button 
           variant="secondary" 
-          onClick={onEnd}
+          onClick={onended}
           disabled={crystallizingRef.current || !isActiveRef.current}
         >
           End Ritual
