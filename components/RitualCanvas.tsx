@@ -86,7 +86,7 @@ export function RitualCanvas({
     
     return () => {
       window.removeEventListener('resize', handleResize);
-      renderer.dispose(null);
+      renderer.dispose();
     };
   }, [flatMode]);
   
