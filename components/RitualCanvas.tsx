@@ -75,10 +75,10 @@ export function RitualCanvas({
     spheresRef.current = Array.from({length: MAX_BANDS}, () => new Array(MAX_ROWS).fill(null));
     activeRowsRef.current = new Array(MAX_BANDS).fill(flatMode ? 0 : MAX_ROWS - 1);
 
-    const handleResize = (null) => {
+    const handleResize = () => {
       if (rendererRef.current) {
         renderer.setSize(window.innerWidth, window.innerHeight);
-        camera.updateProjectionMatrix(null);
+        camera.updateProjectionMatrix();
       }
     };
     handleResize();
