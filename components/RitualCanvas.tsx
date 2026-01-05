@@ -419,7 +419,7 @@ export function RitualCanvas({
   // External Handlers needed for UI buttons (e.g., Play/Pause from parent)
   const handlePause = useCallback(() => {
     if (isActiveRef.current && !isPaused) {
-        onPause();
+        onPause?.();
     }
   }, [isPaused, onPause]);
   
