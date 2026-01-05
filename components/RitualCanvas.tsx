@@ -255,7 +255,7 @@ export function RitualCanvas({
           }
 
           source.start(0);
-          source.onended = () => { if (isActiveRef.current) endSession(null); };
+          source.onended = () => { if (isActiveRef.current) endSession(); };
 
           // Initialize Ritual State
           isActiveRef.current = true;
@@ -266,21 +266,21 @@ export function RitualCanvas({
               const t = timeRemainingRef.current;
               const m = Math.floor(t / 60);
               const s = t % 60;
-              setTimeDisplay(`${m}:${s.toString(null).padStart(2, '0')}`);
+              setTimeDisplay(`${m}:${s.toString().padStart(2, '0')}`);
           };
           
           countdownIntervalRef.current = setInterval(() => {
               timeRemainingRef.current--;
-              updateTimer(null);
+              updateTimer();
               if (timeRemainingRef.current <= 0) {
                   clearInterval(countdownIntervalRef.current);
-                  endSession(null);
+                  endSession();
               }
           }, 1000);
-          updateTimer(null);
+          updateTimer();
 
           // Enable Interaction
-          setupInteractionHandlers(null);
+          setupInteractionHandlers();
 
       } catch (e) {
           console.error("Ritual failed to start:", e);
@@ -299,7 +299,7 @@ export function RitualCanvas({
         
         if (!canvas || !scene || !eqFilters.length || !cameraRef.current) return;
         
-        const rect = canvas.getBoundingClientRect(null);
+        const rect = canvas.getBoundingClientRect();
         const x = ((clientX - rect.left) / rect.width) * 2 - 1;
         const y = -((clientY - rect.top) / rect.height) * 2 + 1;
         
@@ -312,7 +312,7 @@ export function RitualCanvas({
         
         // 1. Lazy Create Column Spheres
         if (!spheres[bandIndex] || !spheres[bandIndex][0]) {
-          if (!spheres[bandIndex]) spheres[bandIndex] = new Array(MAX_ROWS).fill(null);
+          if (!spheres[bandIndex]) spheres[bandIndex] = new Array(MAX_ROWS).fill();
           for (let y = 0; y < MAX_ROWS; y++) {
             const colorHex = CIRCLE_OF_SIX[Math.min(Math.floor(bandIndex / 6), 5)];
             const color = new THREE.Color(`#${colorHex.toString(16).padStart(6, '0')}`);
@@ -339,7 +339,7 @@ export function RitualCanvas({
         activeRowsRef.current[bandIndex] = rowIndex;
         if (spheres[bandIndex][rowIndex]) {
           const material = spheres[bandIndex][rowIndex]?.material as THREE.MeshStandardMaterial;
-          material.emissive = material.color.clone(null);
+          material.emissive = material.color.clone();
           material.emissiveIntensity = 2.0;
         }
         
@@ -350,7 +350,7 @@ export function RitualCanvas({
         }
         
         // 4. Particle effect
-        if (Math.random(null) < 0.3) {
+        if (Math.random() < 0.3) {
           const geometry = new THREE.SphereGeometry(0.008, 8, 8);
           const colorHex = CIRCLE_OF_SIX[Math.min(Math.floor(bandIndex / 6), 5)];
           const material = new THREE.MeshBasicMaterial({ 
@@ -361,7 +361,7 @@ export function RitualCanvas({
           particle.position.set((bandIndex / (MAX_BANDS - 1)) * 2 - 1, (rowIndex / (MAX_ROWS - 1)) * 2 - 1, 0);
           (particle as any).userData = { 
             life: 1.0, 
-            velocity: new THREE.Vector3((Math.random(null) - 0.5) * 0.02, (Math.random(null) - 0.5) * 0.02, 0) 
+            velocity: new THREE.Vector3((Math.random() - 0.5) * 0.02, (Math.random() - 0.5) * 0.02, 0) 
           };
           scene.add(particle);
           gridParticlesRef.current.push(particle);
@@ -376,8 +376,8 @@ export function RitualCanvas({
     const setupInteractionHandlers = () => {
       if (!canvas) return;
       
-      const onTouchStart = (e: TouchEvent) => { e.preventDefault(null); for (let i = 0; i < e.touches.length; i++) handleInteraction(e.touches[i].clientX, e.touches[i].clientY); };
-      const onTouchMove = (e: TouchEvent) => { e.preventDefault(null); for (let i = 0; i < e.touches.length; i++) handleInteraction(e.touches[i].clientX, e.touches[i].clientY); };
+      const onTouchStart = (e: TouchEvent) => { e.preventDefault(); for (let i = 0; i < e.touches.length; i++) handleInteraction(e.touches[i].clientX, e.touches[i].clientY); };
+      const onTouchMove = (e: TouchEvent) => { e.preventDefault(); for (let i = 0; i < e.touches.length; i++) handleInteraction(e.touches[i].clientX, e.touches[i].clientY); };
       const onMouseMove = (e: MouseEvent) => { if (e.buttons === 1) handleInteraction(e.clientX, e.clientY); };
       const onMouseDown = (e: MouseEvent) => { handleInteraction(e.clientX, e.clientY); };
       
@@ -396,19 +396,19 @@ export function RitualCanvas({
     };
 
     // Start the process
-    const cleanupHandlers = setupInteractionHandlers(null);
-    startRitual(null);
+    const cleanupHandlers = setupInteractionHandlers();
+    startRitual();
     
     // Return cleanup for interaction handlers
     return () => {
-        if(cleanupHandlers) cleanupHandlers(null);
+        if(cleanupHandlers) cleanupHandlers();
         if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
         if (sourceNodeRef.current) { try { sourceNodeRef.current.stop(null); } catch {} }
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-            mediaRecorderRef.current.stop(null);
+            mediaRecorderRef.current.stop();
         }
         if (audioCtxRef.current) {
-            audioCtxRef.current.close(null);
+            audioCtxRef.current.close();
         }
     };
   }, [audioBuffer, onComplete]); // DEPENDENCY: Only runs when audioBuffer is ready
@@ -417,14 +417,14 @@ export function RitualCanvas({
   const handlePause = useCallback(() => {
     if (isActiveRef.current && !isPaused) {
         setIsPaused(true);
-        onPause(null);
+        onPause();
     }
   }, [isPaused, onPause]);
   
   const handleResume = useCallback(() => {
     if (isActiveRef.current && isPaused) {
         setIsPaused(false);
-        onResume(null);
+        onResume();
     }
   }, [isPaused, onResume]);
 
@@ -460,9 +460,9 @@ export function RitualCanvas({
           size="sm"
           onClick={() => {
               if (document.fullscreenElement) {
-                  document.exitFullscreen(null);
+                  document.exitFullscreen();
               } else {
-                  containerRef.current?.requestFullscreen(null);
+                  containerRef.current?.requestFullscreen();
               }
           }}
           className="fullscreen-btn"
