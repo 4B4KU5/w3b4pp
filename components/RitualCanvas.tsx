@@ -425,8 +425,7 @@ export function RitualCanvas({
   
   const handleResume = useCallback(() => {
     if (isActiveRef.current && isPaused) {
-        setIsPaused(false);
-        onResume();
+        onResume?.();
     }
   }, [isPaused, onResume]);
 
