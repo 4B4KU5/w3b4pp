@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Orbitron } from 'next/font/google';
 import './globals.css';
-import { Providers } from './providers'; // 1. ADDED THIS IMPORT
+import { Providers } from './providers'; // We will create this next
 
 const inter = Inter({
   subsets: ['latin'],
@@ -32,8 +32,8 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
       </head>
       
-      <body className={`${inter.variable} ${orbitron.variable}`}>
-        {/* 2. WRAPPED CHILDREN WITH THE PROVIDER */}
+      <body className={`${inter.variable} ${orbitron.variable} bg-[#080808]`}>
+        {/* We wrap children here so the whole app has access to the wallet connection */}
         <Providers>
           {children}
         </Providers>
