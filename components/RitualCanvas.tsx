@@ -131,9 +131,9 @@ export function RitualCanvas({
     if (!ctx) return;
     
     if (isPaused && ctx.state === 'running') {
-      ctx.suspend(null);
+      ctx.suspend();
     } else if (!isPaused && ctx.state === 'suspended' && isActiveRef.current) {
-      ctx.resume(null);
+      ctx.resume();
     }
   }, [isPaused]);
   
@@ -151,7 +151,7 @@ export function RitualCanvas({
         
         if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
         if (sourceNodeRef.current) {
-          try { sourceNodeRef.current.stop(null); } catch {}
+          try { sourceNodeRef.current.stop(); } catch {}
         }
         
         // 1. Create Ribbon Line (visualizes final state)
@@ -161,8 +161,8 @@ export function RitualCanvas({
             
             if (ribbonLineRef.current) {
                 scene.remove(ribbonLineRef.current);
-                ribbonLineRef.current.geometry.dispose(null);
-                (ribbonLineRef.current.material as THREE.Material).dispose(null);
+                ribbonLineRef.current.geometry.dispose();
+                (ribbonLineRef.current.material as THREE.Material).dispose();
             }
 
             const points = [];
