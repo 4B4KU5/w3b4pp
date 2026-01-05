@@ -61,7 +61,7 @@ export function RitualCanvas({
     if (!canvasRef.current) return;
     
     const canvas = canvasRef.current;
-    const scene = new THREE.Scene(null);
+    const scene = new THREE.Scene();
     sceneRef.current = scene;
     scene.add(new THREE.AmbientLight(0x404040, 1.2));
     
