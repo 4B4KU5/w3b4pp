@@ -91,8 +91,8 @@ export function RitualCanvas({
   }, [flatMode]);
   
   // --- Effect 2: Main Animation Loop (Runs Continuously) ---
-  useEffect((null) => {
-    const animate = (null) => {
+  useEffect(() => {
+    const animate = () => {
       animationFrameIdRef.current = requestAnimationFrame(animate);
       
       const renderer = rendererRef.current;
@@ -120,13 +120,13 @@ export function RitualCanvas({
     };
     animate(null);
     
-    return (null) => {
+    return () => {
       if (animationFrameIdRef.current) cancelAnimationFrame(animationFrameIdRef.current);
     };
   }, []);
 
   // --- Effect 3: Handle Pause/Resume from Parent ---
-  useEffect((null) => {
+  useEffect(() => {
     const ctx = audioCtxRef.current;
     if (!ctx) return;
     
@@ -138,12 +138,12 @@ export function RitualCanvas({
   }, [isPaused]);
   
   // --- Effect 4: Audio Setup, Interaction Setup, and Start Ritual (Runs ONCE when audioBuffer is passed) ---
-  useEffect((null) => {
+  useEffect(() => {
     if (!audioBuffer || !canvasRef.current) return;
     
     const canvas = canvasRef.current;
     
-    const endSession = useCallback((null) => {
+    const endSession = useCallback(() => {
         if (!isActiveRef.current || crystallizingRef.current) return;
         
         crystallizingRef.current = true;
@@ -155,7 +155,7 @@ export function RitualCanvas({
         }
         
         // 1. Create Ribbon Line (visualizes final state)
-        const createRibbon = (null) => {
+        const createRibbon = () => {
             const scene = sceneRef.current;
             if (!scene || !finalEQStateRef.current.length) return;
             
@@ -198,7 +198,7 @@ export function RitualCanvas({
         
         // 2. Stop Recording & Notify Parent
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-            mediaRecorderRef.current.onstop = (null) => {
+            mediaRecorderRef.current.onstop = () => {
                 const blob = new Blob(recordedChunksRef.current, { type: 'audio/webm' });
                 const image = rendererRef.current?.domElement.toDataURL('image/png') || '';
                 onComplete({ imageDataUrl: image, audioBlob: blob });
@@ -211,7 +211,7 @@ export function RitualCanvas({
     }, [onComplete]);
 
     // --- Main Ritual Start Logic ---
-    const startRitual = async (null) => {
+    const startRitual = async () => {
       try {
           const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
           const audioCtx = new AudioCtx(null);
@@ -255,21 +255,21 @@ export function RitualCanvas({
           }
 
           source.start(0);
-          source.onended = (null) => { if (isActiveRef.current) endSession(null); };
+          source.onended = () => { if (isActiveRef.current) endSession(null); };
 
           // Initialize Ritual State
           isActiveRef.current = true;
           timeRemainingRef.current = Math.floor(audioBuffer.duration);
           
           // Setup Countdown & UI Timer
-          const updateTimer = (null) => {
+          const updateTimer = () => {
               const t = timeRemainingRef.current;
               const m = Math.floor(t / 60);
               const s = t % 60;
               setTimeDisplay(`${m}:${s.toString(null).padStart(2, '0')}`);
           };
           
-          countdownIntervalRef.current = setInterval((null) => {
+          countdownIntervalRef.current = setInterval(() => {
               timeRemainingRef.current--;
               updateTimer(null);
               if (timeRemainingRef.current <= 0) {
@@ -373,7 +373,7 @@ export function RitualCanvas({
         }
     }, [MAX_BANDS, MAX_ROWS]);
     
-    const setupInteractionHandlers = (null) => {
+    const setupInteractionHandlers = () => {
       if (!canvas) return;
       
       const onTouchStart = (e: TouchEvent) => { e.preventDefault(null); for (let i = 0; i < e.touches.length; i++) handleInteraction(e.touches[i].clientX, e.touches[i].clientY); };
@@ -400,7 +400,7 @@ export function RitualCanvas({
     startRitual(null);
     
     // Return cleanup for interaction handlers
-    return (null) => {
+    return () => {
         if(cleanupHandlers) cleanupHandlers(null);
         if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
         if (sourceNodeRef.current) { try { sourceNodeRef.current.stop(null); } catch {} }
@@ -414,14 +414,14 @@ export function RitualCanvas({
   }, [audioBuffer, onComplete]); // DEPENDENCY: Only runs when audioBuffer is ready
   
   // External Handlers needed for UI buttons (e.g., Play/Pause from parent)
-  const handlePause = useCallback((null) => {
+  const handlePause = useCallback(() => {
     if (isActiveRef.current && !isPaused) {
         setIsPaused(true);
         onPause(null);
     }
   }, [isPaused, onPause]);
   
-  const handleResume = useCallback((null) => {
+  const handleResume = useCallback(() => {
     if (isActiveRef.current && isPaused) {
         setIsPaused(false);
         onResume(null);
@@ -458,7 +458,7 @@ export function RitualCanvas({
         <Button 
           variant="secondary" 
           size="sm"
-          onClick={(null) => {
+          onClick={() => {
               if (document.fullscreenElement) {
                   document.exitFullscreen(null);
               } else {
