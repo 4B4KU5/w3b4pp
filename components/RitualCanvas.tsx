@@ -110,7 +110,7 @@ export function RitualCanvas({
           if (p.userData.life <= 0) {
             scene.remove(p);
             p.geometry.dispose(null);
-            (p.material as THREE.Material).dispose(null);
+            (p.material as THREE.Material).dispose();
             particles.splice(i, 1);
           }
         }
