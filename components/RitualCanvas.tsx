@@ -13,6 +13,7 @@ interface RitualCanvasProps {
   onComplete: (result: { imageDataUrl: string; audioBlob: Blob }) => void
   onPause?: () => void // <-- Add this (optional)
   onResume?: () => void // <-- Add this (optional)
+  onEnd?: () => void;
 }
 export function RitualCanvas({ 
     audioBuffer, 
@@ -20,7 +21,8 @@ export function RitualCanvas({
     flatMode, 
     onComplete, 
     onPause,
-    onResume
+    onResume,
+    onEnd
 }: RitualCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -451,7 +453,7 @@ export function RitualCanvas({
         </Button>
         <Button 
           variant="secondary" 
-          onClick={onended}
+          onClick={() => onEnd?.()}
           disabled={crystallizingRef.current || !isActiveRef.current}
         >
           End Ritual
