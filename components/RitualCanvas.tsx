@@ -273,8 +273,11 @@ export function RitualCanvas({
               timeRemainingRef.current--;
               updateTimer();
               if (timeRemainingRef.current <= 0) {
-                  clearInterval(countdownIntervalRef.current);
-                  endSession();
+    if (countdownIntervalRef.current != null) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+    }
+    endSession();
               }
           }, 1000);
           updateTimer();
