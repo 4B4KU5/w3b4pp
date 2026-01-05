@@ -406,7 +406,7 @@ export function RitualCanvas({
     return () => {
         if(cleanupHandlers) cleanupHandlers();
         if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
-        if (sourceNodeRef.current) { try { sourceNodeRef.current.stop(null); } catch {} }
+        if (sourceNodeRef.current) { try { sourceNodeRef.current.stop(); } catch {} }
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
             mediaRecorderRef.current.stop();
         }
