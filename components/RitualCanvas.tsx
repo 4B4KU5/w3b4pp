@@ -118,7 +118,7 @@ export function RitualCanvas({
         renderer.render(scene, camera);
       }
     };
-    animate(null);
+    animate();
     
     return () => {
       if (animationFrameIdRef.current) cancelAnimationFrame(animationFrameIdRef.current);
