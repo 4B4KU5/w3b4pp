@@ -191,10 +191,10 @@ export function RitualCanvas({
                 (ribbonLineRef.current.material as THREE.MeshBasicMaterial).color.setRGB(r, g, b);
                 requestAnimationFrame(pulse);
             };
-            pulse(null);
+            pulse();
         };
         
-        createRibbon(null);
+        createRibbon();
         
         // 2. Stop Recording & Notify Parent
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
@@ -203,10 +203,10 @@ export function RitualCanvas({
                 const image = rendererRef.current?.domElement.toDataURL('image/png') || '';
                 onComplete({ imageDataUrl: image, audioBlob: blob });
             };
-            mediaRecorderRef.current.stop(null);
+            mediaRecorderRef.current.stop();
         } else {
             const image = rendererRef.current?.domElement.toDataURL('image/png') || '';
-            onComplete({ imageDataUrl: image, audioBlob: new Blob(null) });
+            onComplete({ imageDataUrl: image, audioBlob: new Blob() });
         }
     }, [onComplete]);
 
@@ -214,7 +214,7 @@ export function RitualCanvas({
     const startRitual = async () => {
       try {
           const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-          const audioCtx = new AudioCtx(null);
+          const audioCtx = new AudioCtx();
           audioCtxRef.current = audioCtx;
 
           // Initialize EQ Chain
@@ -222,7 +222,7 @@ export function RitualCanvas({
           const eqFilters: BiquadFilterNode[] = [];
           
           for (let i = 0; i < MAX_BANDS; i++) {
-              const filter = audioCtx.createBiquadFilter(null);
+              const filter = audioCtx.createBiquadFilter();
               filter.type = 'peaking';
               filter.frequency.value = bandFrequencies[i];
               filter.Q.value = 1.4;
@@ -233,7 +233,7 @@ export function RitualCanvas({
           eqFiltersRef.current = eqFilters;
 
           // Connect Audio Source -> EQ -> Destination
-          const source = audioCtx.createBufferSource(null);
+          const source = audioCtx.createBufferSource();
           source.buffer = audioBuffer;
           source.connect(eqFilters[0]);
           eqFilters[eqFilters.length - 1].connect(audioCtx.destination);
@@ -241,7 +241,7 @@ export function RitualCanvas({
 
           // Setup Recording Stream
           try {
-              const dest = audioCtx.createMediaStreamDestination(null);
+              const dest = audioCtx.createMediaStreamDestination();
               eqFilters[eqFilters.length - 1].connect(dest);
               const recorder = new MediaRecorder(dest.stream, {
                   mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm'
