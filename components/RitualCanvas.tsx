@@ -315,7 +315,7 @@ export function RitualCanvas({
         
         // 1. Lazy Create Column Spheres
         if (!spheres[bandIndex] || !spheres[bandIndex][0]) {
-          if (!spheres[bandIndex]) spheres[bandIndex] = new Array(MAX_ROWS).fill();
+          if (!spheres[bandIndex]) spheres[bandIndex] = new Array(MAX_ROWS).fill(null);
           for (let y = 0; y < MAX_ROWS; y++) {
             const colorHex = CIRCLE_OF_SIX[Math.min(Math.floor(bandIndex / 6), 5)];
             const color = new THREE.Color(`#${colorHex.toString(16).padStart(6, '0')}`);
